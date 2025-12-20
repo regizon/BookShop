@@ -35,3 +35,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['native_name', 'phone_number']
 
     objects = UserManager()
+
+
+class EmailLoginCode(models.Model):
+    email = models.EmailField()
+    code = models.CharField(max_length=4)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    attempts = models.IntegerField(default=0)

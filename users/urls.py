@@ -6,10 +6,13 @@ from rest_framework_simplejwt.views import (
 )
 
 from users import views
+from users.views import GenerateCode
 
 urlpatterns = [
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    #path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/login/', GenerateCode.as_view(), name="get_code"),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('register/', views.CreateUser.as_view(), name='register'),
+    path('auth/register/', views.CreateUser.as_view(), name='register'),
+    path('auth/verify/', views.EmailVerify.as_view(), name='token_verify'),
 ]

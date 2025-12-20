@@ -23,3 +23,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         new_user.set_unusable_password()
         new_user.save()
         return new_user
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class EmailVerifySerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField()
