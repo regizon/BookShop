@@ -1,3 +1,4 @@
+from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
@@ -6,7 +7,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.services import check_login_code, request_login_code
+from users.services import check_login_code, request_login_code, get_tokens_for_user
 
 from users.models import EmailLoginCode
 from users.serializers import UserRegisterSerializer, EmailVerifySerializer, EmailSerializer
@@ -39,6 +40,8 @@ class EmailVerify(APIView):
         code = validated_data.get('code')
 
         if check_login_code(email, code):
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+            user = get_user_model().objects.get(email=email)
+            tokens = get_tokens_for_user(user)
+            return Response({"message": "Login successful", "tokens": tokens}, status=status.HTTP_200_OK)
 
         return Response({"message": "Invalid or expired code"}, status=status.HTTP_417_EXPECTATION_FAILED)

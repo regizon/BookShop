@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from random import randint
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 from users.models import EmailLoginCode
 
@@ -20,8 +22,6 @@ def request_login_code(email):
         code=code,
     )
 
-    print(code)
-
     send_mail(
         subject="Login code",
         message=code,
@@ -30,17 +30,29 @@ def request_login_code(email):
     )
 
 def check_login_code(email, code):
-    user = EmailLoginCode.objects.filter(email=email, is_used=False).first()
-    if user is not None:
-        user = user[0]
-        if user.code == code:
-            if datetime.now(timezone.utc) - user.created_at < timedelta(minutes=5) and user.attempts < 3:
-                user.is_used = True
-                user.save()
+    db_code = EmailLoginCode.objects.filter(email=email, is_used=False).order_by('-created_at').first()
+    if db_code is not None:
+        if db_code.code == code:
+            print(code)
+            if datetime.now(timezone.utc) - db_code.created_at < timedelta(minutes=5) and db_code.attempts < 3:
+                db_code.is_used = True
+                db_code.save()
                 return True
             else:
-                user.is_used = True
-                user.save()
+                db_code.is_used = True
+                db_code.save()
 
-        user.attempts += 1
+        db_code.attempts += 1
+        db_code.save()
     return False
+
+def get_tokens_for_user(user):
+    if not user.is_active:
+      raise AuthenticationFailed("User is not active")
+
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }

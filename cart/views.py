@@ -1,14 +1,12 @@
-from http.client import HTTPResponse
 
-from django.db.migrations import serializer
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, DestroyAPIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from cart.models import CartItem
 from cart.serializers import CartItemSerializer, ViewItemsSerializer
-from cart.services import get_or_create_cart
+from cart.services import get_or_create_cart, get_book
 
 
 # Create your views here.
@@ -19,24 +17,24 @@ class AddItemToCart(CreateAPIView):
     def perform_create(self, serializer):
         request = self.request
         cart = get_or_create_cart(request)
-        book = serializer.validated_data.get('book')
-        cart_item = CartItem.objects.filter(cart=cart, book=book).first()
+        price, cart_item = get_book(serializer, cart)
         if cart_item:
             cart_item.quantity += 1
+            cart_item.price += price
             cart_item.save()
         else:
-            serializer.save(cart=cart)
+            serializer.save(cart=cart, price=price)
 
 class DeleteFromCart(APIView):
     def delete(self, request):
         cart = get_or_create_cart(request)
         serializer = CartItemSerializer(data = request.data)
         serializer.is_valid()
-        book = serializer.validated_data.get('book')
-        cart_item = CartItem.objects.filter(cart=cart, book=book).first()
+        price, cart_item = get_book(serializer, cart)
         if cart_item:
             if cart_item.quantity > 1:
                 cart_item.quantity -= 1
+                cart_item.price -= price
                 cart_item.save()
             elif cart_item.quantity == 1:
                 cart_item.delete()

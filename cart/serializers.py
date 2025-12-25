@@ -5,8 +5,8 @@ from cart.models import Cart, CartItem
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = ['cart', 'book', 'quantity']
-        read_only_fields = ['cart']
+        fields = ['cart', 'book', 'quantity', 'price']
+        read_only_fields = ['cart', 'price']
     extra_kwargs = {
         'cart': {'required': False}
     }
@@ -16,6 +16,7 @@ class ViewItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['items']
+
 
 class AddCartItemSerializer(serializers.ModelSerializer):
     class Meta:

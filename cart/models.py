@@ -20,6 +20,7 @@ class Cart(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    price = models.FloatField()
     quantity = models.IntegerField(default=1)
 
     class Meta:
