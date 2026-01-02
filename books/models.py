@@ -4,6 +4,7 @@ class Book(models.Model):
     title = models.CharField(max_length=100, null=False, blank=False)
     description = models.TextField(max_length=500, null=False)
     price = models.FloatField(null=False)
+    cover = models.TextField(max_length=500, null=False)
     pub_date = models.DateTimeField('date published')
 
 class Author(models.Model):

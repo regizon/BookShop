@@ -10,7 +10,7 @@ class BookSerializer(serializers.ModelSerializer,):
     genres_read = serializers.SerializerMethodField()
     class Meta:
         model = Book
-        fields= ['author_read', 'id', 'title', 'description', 'price', 'pub_date', 'genres', 'genres_read', 'authors']
+        fields= ['author_read', 'id', 'title', 'description', 'price', 'pub_date', 'genres', 'genres_read', 'authors', 'cover']
 
     def get_genres_read(self, obj):
         book_genres = BookGenre.objects.filter(book=obj)
