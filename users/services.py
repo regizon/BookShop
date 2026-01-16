@@ -22,12 +22,13 @@ def request_login_code(email):
         code=code,
     )
 
-    send_mail(
-        subject="Login code",
-        message=code,
-        from_email=None,
-        recipient_list=[email]
-    )
+    # send_mail(
+    #     subject="Login code",
+    #     message=code,
+    #     from_email=None,
+    #     recipient_list=[email]
+    # )
+    print(code)
 
 def check_login_code(email, code):
     db_code = EmailLoginCode.objects.filter(email=email, is_used=False).order_by('-created_at').first()
