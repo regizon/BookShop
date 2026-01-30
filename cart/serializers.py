@@ -1,8 +1,12 @@
 from rest_framework import serializers
 
+from books.models import Book
+from books.serializers import BookSerializer
 from cart.models import Cart, CartItem
 
-class CartItemSerializer(serializers.ModelSerializer):
+class CartItemRedactorSerializer(serializers.ModelSerializer):
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
+
     class Meta:
         model = CartItem
         fields = ['cart', 'book', 'quantity', 'price']
@@ -11,11 +15,23 @@ class CartItemSerializer(serializers.ModelSerializer):
         'cart': {'required': False}
     }
 
+class CartItemViewSerializer(serializers.ModelSerializer):
+    book = BookSerializer(read_only=True)
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'cart', 'book', 'quantity', 'price']
+        read_only_fields = ['id', 'cart', 'price']
+    extra_kwargs = {
+        'cart': {'required': False}
+    }
+
 class ViewItemsSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(source='cartitem_set', many=True)
+    items = CartItemViewSerializer(source='cartitem_set', many=True)
     class Meta:
         model = Cart
-        fields = ['items']
+        fields = ['items', 'total_price']
+        read_only_fields = ['total_price']
 
 
 class AddCartItemSerializer(serializers.ModelSerializer):

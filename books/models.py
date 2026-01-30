@@ -23,6 +23,7 @@ class Book(models.Model):
     cover_type = models.CharField(max_length=50, null=False, blank=False)
     language = models.CharField(max_length=50, null=False, blank=False)
     isbn = models.CharField(max_length=13, unique=True)
+    quantity = models.PositiveIntegerField()
 
 class BookAuthor(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
