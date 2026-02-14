@@ -30,8 +30,7 @@ class ViewItemsSerializer(serializers.ModelSerializer):
     items = CartItemViewSerializer(source='cartitem_set', many=True)
     class Meta:
         model = Cart
-        fields = ['items', 'total_price']
-        read_only_fields = ['total_price']
+        fields = ['items']
 
 
 class AddCartItemSerializer(serializers.ModelSerializer):

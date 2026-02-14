@@ -29,10 +29,10 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     native_name = models.CharField(max_length=20)
-    phone_number = models.CharField(max_length=10)
+    phone_number = models.CharField(max_length=10, null=True, blank=True)
     USERNAME_FIELD = 'email'
     username = None
-    REQUIRED_FIELDS = ['native_name', 'phone_number']
+    REQUIRED_FIELDS = ['native_name']
 
     objects = UserManager()
 

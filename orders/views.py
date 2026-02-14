@@ -33,7 +33,7 @@ class CreateOrder(CreateAPIView):
             order.total_price += price * quantity
             order_item.save()
             order.save()
-        cart_items.delete()
+        cart.delete()
 
 
 class OrderList(ListAPIView):

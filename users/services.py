@@ -1,11 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from random import randint
+
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 from users.models import EmailLoginCode
+
+class UserAlreadyExists(Exception):
+    pass
 
 
 def generate_2fa_code():
@@ -30,6 +35,7 @@ def request_login_code(email):
     # )
     print(code)
 
+
 def check_login_code(email, code):
     db_code = EmailLoginCode.objects.filter(email=email, is_used=False).order_by('-created_at').first()
     if db_code is not None:
@@ -47,6 +53,7 @@ def check_login_code(email, code):
         db_code.save()
     return False
 
+
 def get_tokens_for_user(user):
     if not user.is_active:
       raise AuthenticationFailed("User is not active")
@@ -57,3 +64,20 @@ def get_tokens_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
+
+def register_user(email, native_name, phone_number):
+    user = get_user_model()
+    new_user = user.objects.create_user(email=email, native_name=native_name, phone_number=phone_number)
+    new_user.set_unusable_password()
+    new_user.save()
+    return new_user
+
+
+def get_user(email):
+    user = get_user_model().objects.filter(email=email).first()
+    if user:
+        return user
+    else:
+        return None
+
+
