@@ -8,6 +8,7 @@ from rest_framework.status import HTTP_401_UNAUTHORIZED
 from cart.models import Cart, CartItem
 from orders.models import Order, OrderItem
 from orders.serializers import OrderSerializer
+from orders.services import check_user_cart, OrderConfirmationError, fill_order
 
 
 class CreateOrder(CreateAPIView):
@@ -17,23 +18,15 @@ class CreateOrder(CreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        cart = Cart.objects.filter(customer=user).first()
-        if cart is None:
-            raise ValidationError({"cart": "Cart does not exist."})
-        cart_items = CartItem.objects.filter(cart=cart)
-        if len(cart_items) == 0:
-            raise ValidationError({"cart": "Cart is empty"})
+        try:
+            cart = Cart.objects.filter(customer=user).first()
+            cart_items = check_user_cart(cart)
+            order = serializer.save(customer=user)
+            fill_order(order, cart_items)
+            cart.delete()
 
-        order = serializer.save(customer=user)
-        for item in cart_items:
-            book = item.book
-            price = item.price
-            quantity = item.quantity
-            order_item = OrderItem.objects.create(order=order, item=book, price=price, quantity=quantity)
-            order.total_price += price * quantity
-            order_item.save()
-            order.save()
-        cart.delete()
+        except OrderConfirmationError as e:
+            raise ValidationError(str(e))
 
 
 class OrderList(ListAPIView):
