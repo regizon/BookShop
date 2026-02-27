@@ -79,8 +79,8 @@ def minus_item(book, cart):
 def add_item(cart, book):
     price = book.price
     quantity = book.quantity
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, price=price)
     if quantity > 0:
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, price=price)
         if created:
             cart_item.save()
         else:

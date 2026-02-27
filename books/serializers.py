@@ -6,6 +6,7 @@ from books.models import Book, Genre, BookGenre, Author, BookAuthor, Publisher
 class BookSerializer(serializers.ModelSerializer,):
     genres = serializers.ListField(required=True, child=serializers.IntegerField(), write_only=True)
     authors = serializers.ListField(required=True, child=serializers.CharField(), write_only=True)
+    publisher = serializers.SerializerMethodField()
     author_read = serializers.SerializerMethodField()
     genres_read = serializers.SerializerMethodField()
     class Meta:
@@ -13,9 +14,16 @@ class BookSerializer(serializers.ModelSerializer,):
         fields= ['author_read', 'id', 'title', 'description', 'price', 'pub_date', 'genres', 'genres_read', 'authors', 'cover',
                  'publisher', 'pages', 'cover_type', 'language', 'isbn', 'quantity']
 
+
+    def get_publisher(self, obj):
+        return obj.publisher.name
+
     def get_genres_read(self, obj):
-        book_genres = BookGenre.objects.filter(book=obj)
-        genres = book_genres.values_list('genre', flat=True)
+        genre_ids = BookGenre.objects.values_list('genre', flat=True).filter(book=obj)
+        genres = []
+        for id in genre_ids:
+            genre = Genre.objects.get(id=id).name
+            genres.append(genre)
         return genres
 
     def get_author_read(self, obj):
