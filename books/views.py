@@ -1,5 +1,6 @@
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.decorators import permission_classes
+from rest_framework import filters
 from books.models import Book, Publisher, Genre
 from books.serializers import BookSerializer, PublisherSerializer, GenreSerializer
 from books.permissions import IsAdminOrReadOnly
@@ -8,6 +9,9 @@ from books.permissions import IsAdminOrReadOnly
 class BookList(ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title']
+
 
 @permission_classes([IsAdminOrReadOnly])
 class BookDetails(RetrieveUpdateDestroyAPIView):
