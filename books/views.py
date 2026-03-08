@@ -1,4 +1,4 @@
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView
 from rest_framework.decorators import permission_classes
 from rest_framework import filters
 from books.models import Book, Publisher, Genre
@@ -11,6 +11,22 @@ class BookList(ListCreateAPIView):
     serializer_class = BookSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
+
+    # def get_queryset(self):
+    #     queryset = Book.objects.all()
+    #     category = self.request.query_params.get('category')
+    #     if category is not None:
+    #         queryset = queryset.filter(bookgenre__genre__name=category.capitalize())
+    #     return queryset
+
+
+class BookListByCategory(ListAPIView):
+    serializer_class = BookSerializer
+    def get_queryset(self):
+        queryset = Book.objects.all()
+        category = self.kwargs['category']
+        queryset = queryset.filter(bookgenre__genre__slug=category)
+        return queryset
 
 
 @permission_classes([IsAdminOrReadOnly])
