@@ -28,7 +28,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    native_name = models.CharField(max_length=20)
+    native_name = models.CharField(max_length=30)
+    surname = models.CharField(max_length=30, null=True, blank=True)
     phone_number = models.CharField(max_length=10, null=True, blank=True)
     USERNAME_FIELD = 'email'
     username = None

@@ -9,7 +9,6 @@ class Author(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False)
-    #slug = models.SlugField(null=False, blank=False)
     slug = AutoSlugField(populate_from='name')
 
     # def save(self, *args, **kwargs):

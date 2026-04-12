@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 
 from books.models import Book
@@ -18,9 +19,10 @@ class Cart(models.Model):
     ]
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     price = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
     quantity = models.IntegerField(default=1)
 
     class Meta:

@@ -195,7 +195,8 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "http://localhost:5174"
 ]
 
 CORS_ALLOW_CREDENTIALS = True

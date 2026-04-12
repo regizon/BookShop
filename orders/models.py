@@ -1,13 +1,21 @@
+from autoslug.fields import modeltranslation_update_slugs
 from django.db import models
 from books.models import Book
 from users.models import User
 
 
-class StatusChoice(models.TextChoices):
+class DeliveryStatusChoice(models.TextChoices):
     pending = 'pending'
-    paid = 'paid'
     shipped = 'shipped'
     cancelled = 'cancelled'
+
+
+class PaymentStatusChoice(models.TextChoices):
+    paid = 'paid'
+    unpaid = 'unpaid'
+    failed = 'failed'
+    refunded = 'refunded'
+    partially_refunded = 'partially_refunded'
 
 
 class DeliveryChoice(models.TextChoices):
@@ -24,7 +32,8 @@ class Order(models.Model):
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)
     order_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(choices=StatusChoice, default=StatusChoice.pending)
+    delivery_status = models.CharField(choices=DeliveryStatusChoice, default=DeliveryStatusChoice.pending)
+    payment_status = models.CharField(choices=PaymentStatusChoice, default=PaymentStatusChoice.unpaid)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     comments = models.TextField(blank=True)
     delivery_type = models.CharField(choices=DeliveryChoice)
@@ -37,7 +46,7 @@ class Order(models.Model):
     apartment = models.PositiveSmallIntegerField(null=True)
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    item = models.ForeignKey(Book, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    item = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='book')
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)

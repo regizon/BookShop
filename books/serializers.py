@@ -52,6 +52,20 @@ class BookSerializer(serializers.ModelSerializer,):
 
         return book
 
+class BookPreviewSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Book
+        fields = ['title', 'cover', 'author']
+
+    def get_author(self, obj):
+        authors = []
+        book_authors = BookAuthor.objects.filter(book=obj)
+        for author in book_authors:
+            authors.append(author.author.name)
+        return authors
+
 class PublisherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publisher
@@ -60,4 +74,4 @@ class PublisherSerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ['name']
+        fields = ['name', 'slug']

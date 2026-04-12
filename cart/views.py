@@ -61,6 +61,7 @@ class MinusFromCart(APIView):
             }, status.HTTP_400_BAD_REQUEST)
 
 class ViewCart(APIView):
+
     def get(self, request):
         cart = get_or_create_cart(request)
         serializer = ViewItemsSerializer(cart)

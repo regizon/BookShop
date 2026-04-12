@@ -7,7 +7,7 @@ from rest_framework.status import HTTP_401_UNAUTHORIZED
 
 from cart.models import Cart, CartItem
 from orders.models import Order, OrderItem
-from orders.serializers import OrderSerializer
+from orders.serializers import OrderSerializer, RecentOrderSerializer
 from orders.services import check_user_cart, OrderConfirmationError, fill_order
 
 
@@ -29,12 +29,29 @@ class CreateOrder(CreateAPIView):
             raise ValidationError(str(e))
 
 
+class RecentOrders(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Order.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        limit = 3
+        return Order.objects.filter(customer=user).order_by('-id')[:limit]
+
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = RecentOrderSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 class OrderList(ListAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Order.objects.all()
 
     def get_queryset(self):
         user = self.request.user
+
+
         return Order.objects.filter(customer=user)
 
     def list(self, request):

@@ -27,11 +27,14 @@ class CartItemViewSerializer(serializers.ModelSerializer):
     }
 
 class ViewItemsSerializer(serializers.ModelSerializer):
-    items = CartItemViewSerializer(source='cartitem_set', many=True)
+    items = serializers.SerializerMethodField()
     class Meta:
         model = Cart
         fields = ['items']
 
+    def get_items(self, obj):
+        items = obj.items.all().order_by('created_at')
+        return CartItemViewSerializer(items, many=True).data
 
 class AddCartItemSerializer(serializers.ModelSerializer):
     class Meta:

@@ -25,7 +25,7 @@ class BookListByCategory(ListAPIView):
     def get_queryset(self):
         queryset = Book.objects.all()
         category = self.kwargs['category']
-        queryset = queryset.filter(bookgenre__genre__slug=category)
+        queryset = queryset.filter(bookgenre__genre__slug=category).order_by('-quantity')
         return queryset
 
 
