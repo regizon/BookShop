@@ -1,9 +1,15 @@
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView
 from rest_framework.decorators import permission_classes
-from rest_framework import filters
+from rest_framework import filters, status
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from books.models import Book, Publisher, Genre
 from books.serializers import BookSerializer, PublisherSerializer, GenreSerializer
 from books.permissions import IsAdminOrReadOnly
+from books.services import parse_book
+
 
 @permission_classes([IsAdminOrReadOnly])
 class BookList(ListCreateAPIView):
@@ -28,7 +34,15 @@ class BookListByCategory(ListAPIView):
         queryset = queryset.filter(bookgenre__genre__slug=category).order_by('-quantity')
         return queryset
 
+@permission_classes([IsAdminUser])
+class BookParser(APIView):
+    def get(self, request):
+        title = request.query_params.get('title', None)
+        print(title)
+        if title:
+            parse_book(title)
 
+        return Response(status=status.HTTP_200_OK)
 @permission_classes([IsAdminOrReadOnly])
 class BookDetails(RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()

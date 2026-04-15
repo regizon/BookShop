@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,6 +26,14 @@ class RegisterUserRequest(APIView):
 
         request_login_code(email)
         return Response({"message": "Code was sent"}, status=status.HTTP_200_OK)
+
+
+class CheckAdmin(APIView):
+    permission_classes = [IsAdminUser,]
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
+
+
 
 
 class LoginUserRequest(APIView):
