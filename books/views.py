@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from books.models import Book, Publisher, Genre
-from books.serializers import BookSerializer, PublisherSerializer, GenreSerializer
+from books.models import Book, Publisher, Genre, BookCollection, Collection
+from books.serializers import BookSerializer, PublisherSerializer, GenreSerializer, BookCollectionSerializer, \
+    CollectionSerializer
 from books.permissions import IsAdminOrReadOnly
 from books.services import parse_book
 
@@ -17,6 +18,17 @@ class BookList(ListCreateAPIView):
     serializer_class = BookSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
+
+
+# @permission_classes([IsAdminOrReadOnly])
+# class BookCollectionList(ListCreateAPIView):
+#     queryset = BookCollection.objects.all()
+#     serializer_class = BookCollectionSerializer
+
+@permission_classes([IsAdminOrReadOnly])
+class BookCollectionList(ListCreateAPIView):
+    queryset = Collection.objects.prefetch_related('bookcollection_set__book')
+    serializer_class = CollectionSerializer
 
     # def get_queryset(self):
     #     queryset = Book.objects.all()

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from books.models import Book, Genre, BookGenre, Author, BookAuthor, Publisher
+from books.models import Book, Genre, BookGenre, Author, BookAuthor, Publisher, BookCollection, Collection
 
 
 class BookSerializer(serializers.ModelSerializer,):
@@ -41,7 +41,7 @@ class BookSerializer(serializers.ModelSerializer,):
         publisher_name = validated_data.pop('publisher')
         publisher = Publisher.objects.get_or_create(name=publisher_name)[0]
         book = Book.objects.create(**validated_data, publisher=publisher)
-        
+
         for genre in genres:
             if not Genre.objects.filter(id=genre).exists():
                 book.delete()
@@ -80,3 +80,20 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ['id', 'name', 'slug']
+
+class BookCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookCollection
+        fields = '__all__'
+
+class CollectionSerializer(serializers.ModelSerializer):
+    books = serializers.SerializerMethodField()
+
+    def get_books(self, obj):
+        books = Book.objects.filter(bookcollection__collection=obj)
+        ready_books = BookSerializer(books, many=True).data
+        return ready_books
+
+    class Meta:
+        model = Collection
+        fields = ['id', 'name', 'books']
