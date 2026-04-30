@@ -1,4 +1,4 @@
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView, CreateAPIView
 from rest_framework.decorators import permission_classes
 from rest_framework import filters, status
 from rest_framework.permissions import IsAdminUser
@@ -25,6 +25,9 @@ class BookList(ListCreateAPIView):
     #         queryset = queryset.filter(bookgenre__genre__name=category.capitalize())
     #     return queryset
 
+# @permission_classes([IsAdminUser])
+# class BookCreate(CreateAPIView):
+
 
 class BookListByCategory(ListAPIView):
     serializer_class = BookSerializer
@@ -37,12 +40,15 @@ class BookListByCategory(ListAPIView):
 @permission_classes([IsAdminUser])
 class BookParser(APIView):
     def get(self, request):
+        author = request.query_params.get('author', None)
         title = request.query_params.get('title', None)
-        print(title)
+        publisher = request.query_params.get('publisher', None)
         if title:
-            parse_book(title)
-
-        return Response(status=status.HTTP_200_OK)
+            book_info = parse_book(title, author, publisher)
+            if book_info:
+                return Response({"message": book_info}, status=status.HTTP_200_OK)
+            return Response({"message": "Book wasn't found or something went wrong with Books API"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "author and title are required"}, status=status.HTTP_400_BAD_REQUEST)
 @permission_classes([IsAdminOrReadOnly])
 class BookDetails(RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()

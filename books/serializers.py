@@ -6,16 +6,17 @@ from books.models import Book, Genre, BookGenre, Author, BookAuthor, Publisher
 class BookSerializer(serializers.ModelSerializer,):
     genres = serializers.ListField(required=True, child=serializers.IntegerField(), write_only=True)
     authors = serializers.ListField(required=True, child=serializers.CharField(), write_only=True)
-    publisher = serializers.SerializerMethodField()
+    publisher_read = serializers.SerializerMethodField()
+    publisher = serializers.CharField()
     author_read = serializers.SerializerMethodField()
     genres_read = serializers.SerializerMethodField()
     class Meta:
         model = Book
-        fields= ['author_read', 'id', 'title', 'description', 'price', 'pub_date', 'genres', 'genres_read', 'authors', 'cover',
-                 'publisher', 'pages', 'cover_type', 'language', 'isbn', 'quantity']
+        fields= ['author_read', 'id', 'title', 'description', 'price', 'genres', 'genres_read', 'authors', 'cover',
+                 'publisher', 'publisher_read' ,'pages', 'cover_type', 'language', 'isbn', 'quantity']
 
 
-    def get_publisher(self, obj):
+    def get_publisher_read(self, obj):
         return obj.publisher.name
 
     def get_genres_read(self, obj):
@@ -33,11 +34,14 @@ class BookSerializer(serializers.ModelSerializer,):
             authors.append(author.author.name)
         return authors
 
+
     def create(self, validated_data):
         genres = validated_data.pop('genres')
         authors = validated_data.pop('authors')
-        book = Book.objects.create(**validated_data)
-
+        publisher_name = validated_data.pop('publisher')
+        publisher = Publisher.objects.get_or_create(name=publisher_name)[0]
+        book = Book.objects.create(**validated_data, publisher=publisher)
+        
         for genre in genres:
             if not Genre.objects.filter(id=genre).exists():
                 book.delete()
@@ -49,6 +53,7 @@ class BookSerializer(serializers.ModelSerializer,):
         for author_name in authors:
             author = Author.objects.get_or_create(name=author_name)[0]
             BookAuthor.objects.create(book=book, author=author)
+
 
         return book
 
@@ -74,4 +79,4 @@ class PublisherSerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ['name', 'slug']
+        fields = ['id', 'name', 'slug']

@@ -9,17 +9,20 @@ class Book:
         self.page_count = page_count
 
 
-def parse_book(title):
-    api_url = f'https://www.googleapis.com/books/v1/volumes?q={title}&key=AIzaSyCtp3Yer6bXA83ZoM3lIOPUFJYdOoYufyE'
+def parse_book(title, author, publisher):
+    if publisher:
+        api_url = f'https://www.googleapis.com/books/v1/volumes?q={title}&author={author}&inpublisher={publisher}&key=AIzaSyCtp3Yer6bXA83ZoM3lIOPUFJYdOoYufyE'
+    else:
+        api_url = f'https://www.googleapis.com/books/v1/volumes?q={title}&author={author}&key=AIzaSyCtp3Yer6bXA83ZoM3lIOPUFJYdOoYufyE'
     response = requests.get(api_url)
+    best_choice = None
     if 'items' in response.json().keys():
         for item in response.json()['items']:
             info = item['volumeInfo']
-            if 'description' in info.keys():
-                print(info['description'])
-            # if info['description'] is not None and info['pageCount'] is not None and info['imageLinks'] is not None:
-            #     book = Book(info['title'], info['description'], info['authors'], info['pageCount'])
-            #     print(book)
-            #     break
+            if 'description' in info.keys() and 'pageCount' in info.keys() and 'imageLinks' in info.keys() and 'publisher' in info.keys():
+                best_choice = info
+                break
     else:
         print("error")
+
+    return best_choice

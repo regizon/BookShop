@@ -6,6 +6,8 @@ from django.utils.text import slugify
 class Author(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
 
+class Collection(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False)
 
 class Genre(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False)
@@ -27,7 +29,6 @@ class Book(models.Model):
     description = models.TextField(max_length=1500, null=False)
     price = models.IntegerField(null=False, blank=False)
     cover = models.TextField(max_length=500, null=False)
-    pub_date = models.DateTimeField('date published')
     publisher = models.ForeignKey(Publisher, on_delete=models.PROTECT)
     pages = models.PositiveIntegerField()
     cover_type = models.CharField(max_length=50, null=False, blank=False)
@@ -43,3 +44,8 @@ class BookAuthor(models.Model):
 class BookGenre(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+
+
+class BookCollection(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
