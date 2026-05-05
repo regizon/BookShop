@@ -1,3 +1,4 @@
+from django.db.models import Prefetch, Case, When, IntegerField
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView, CreateAPIView
 from rest_framework.decorators import permission_classes
 from rest_framework import filters, status
@@ -20,14 +21,39 @@ class BookList(ListCreateAPIView):
     search_fields = ['title']
 
 
-# @permission_classes([IsAdminOrReadOnly])
-# class BookCollectionList(ListCreateAPIView):
-#     queryset = BookCollection.objects.all()
-#     serializer_class = BookCollectionSerializer
+@permission_classes([IsAdminOrReadOnly])
+class BookCollectionPairsList(ListCreateAPIView):
+    queryset = BookCollection.objects.all()
+    serializer_class = BookCollectionSerializer
+
+    def delete(self, request):
+        book_id = request.data.get('book')
+        collection_id = request.data.get('collection')
+        if collection_id and book_id:
+            deleted_count, _ = BookCollection.objects.filter(book_id=book_id, collection_id=collection_id).delete()
+
+            if deleted_count:
+                return Response({"message": "Book was deleted successfully"}, status=status.HTTP_200_OK)
+
+            return Response({'message': "Book wasn't found"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'message': 'Both book_id and collection_id are required'}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([IsAdminOrReadOnly])
 class BookCollectionList(ListCreateAPIView):
-    queryset = Collection.objects.prefetch_related('bookcollection_set__book')
+    queryset = Collection.objects.prefetch_related(
+        Prefetch(
+            'bookcollection_set',
+            queryset=BookCollection.objects.select_related('book').annotate(
+                in_stock=Case(
+                    When(book__quantity=0, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            ).order_by('in_stock')
+        )
+    )
+
     serializer_class = CollectionSerializer
 
     # def get_queryset(self):

@@ -84,15 +84,15 @@ class GenreSerializer(serializers.ModelSerializer):
 class BookCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookCollection
-        fields = '__all__'
+        fields = ['book', 'collection']
 
 class CollectionSerializer(serializers.ModelSerializer):
     books = serializers.SerializerMethodField()
 
     def get_books(self, obj):
-        books = Book.objects.filter(bookcollection__collection=obj)
-        ready_books = BookSerializer(books, many=True).data
-        return ready_books
+        book_collections = obj.bookcollection_set.all()
+        books = [bc.book for bc in book_collections]
+        return BookSerializer(books, many=True).data
 
     class Meta:
         model = Collection
