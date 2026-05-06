@@ -7,7 +7,6 @@ class BookSerializer(serializers.ModelSerializer,):
     genres = serializers.ListField(required=True, child=serializers.IntegerField(), write_only=True)
     authors = serializers.ListField(required=True, child=serializers.CharField(), write_only=True)
     publisher_read = serializers.SerializerMethodField()
-    publisher = serializers.CharField()
     author_read = serializers.SerializerMethodField()
     genres_read = serializers.SerializerMethodField()
     class Meta:
