@@ -1,6 +1,10 @@
+import logging
+
 from rest_framework import serializers
 
 from books.models import Book, Genre, BookGenre, Author, BookAuthor, Publisher, BookCollection, Collection
+
+logger = logging.getLogger(__name__)
 
 
 class BookSerializer(serializers.ModelSerializer,):
@@ -34,6 +38,15 @@ class BookSerializer(serializers.ModelSerializer,):
             authors.append(author.author.name)
         return authors
 
+    def _sync_akcii_collection(self, book):
+        akcii = Collection.objects.filter(name='Акції').first()
+        if akcii is None:
+            logger.warning("Collection 'Акції' not found in the database; skipping discount sync")
+            return
+        if book.discount_price is not None:
+            BookCollection.objects.get_or_create(book=book, collection=akcii)
+        else:
+            BookCollection.objects.filter(book=book, collection=akcii).delete()
 
     def update(self, instance, validated_data):
         genres = validated_data.pop('genres', None)
@@ -63,6 +76,8 @@ class BookSerializer(serializers.ModelSerializer,):
                 genre = Genre.objects.get(id=genre_id)
                 BookGenre.objects.create(book=instance, genre=genre)
 
+        self._sync_akcii_collection(instance)
+
         return instance
 
     def create(self, validated_data):
@@ -84,6 +99,7 @@ class BookSerializer(serializers.ModelSerializer,):
             author = Author.objects.get_or_create(name=author_name)[0]
             BookAuthor.objects.create(book=book, author=author)
 
+        self._sync_akcii_collection(book)
 
         return book
 
