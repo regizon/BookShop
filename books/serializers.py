@@ -6,6 +6,7 @@ from books.models import Book, Genre, BookGenre, Author, BookAuthor, Publisher, 
 class BookSerializer(serializers.ModelSerializer,):
     genres = serializers.ListField(required=True, child=serializers.IntegerField(), write_only=True)
     authors = serializers.ListField(required=True, child=serializers.CharField(), write_only=True)
+    publisher = serializers.CharField(write_only=True)
     publisher_read = serializers.SerializerMethodField()
     author_read = serializers.SerializerMethodField()
     genres_read = serializers.SerializerMethodField()
@@ -33,6 +34,36 @@ class BookSerializer(serializers.ModelSerializer,):
             authors.append(author.author.name)
         return authors
 
+
+    def update(self, instance, validated_data):
+        genres = validated_data.pop('genres', None)
+        authors = validated_data.pop('authors', None)
+        publisher_name = validated_data.pop('publisher', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if publisher_name is not None:
+            publisher = Publisher.objects.get_or_create(name=publisher_name)[0]
+            instance.publisher = publisher
+
+        instance.save()
+
+        if authors is not None:
+            BookAuthor.objects.filter(book=instance).delete()
+            for author_name in authors:
+                author = Author.objects.get_or_create(name=author_name)[0]
+                BookAuthor.objects.create(book=instance, author=author)
+
+        if genres is not None:
+            BookGenre.objects.filter(book=instance).delete()
+            for genre_id in genres:
+                if not Genre.objects.filter(id=genre_id).exists():
+                    raise serializers.ValidationError('Genre does not exist')
+                genre = Genre.objects.get(id=genre_id)
+                BookGenre.objects.create(book=instance, genre=genre)
+
+        return instance
 
     def create(self, validated_data):
         genres = validated_data.pop('genres')
