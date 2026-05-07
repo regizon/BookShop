@@ -35,6 +35,7 @@ class Book(models.Model):
     language = models.CharField(max_length=50, null=False, blank=False)
     isbn = models.CharField(max_length=13, unique=True)
     quantity = models.PositiveIntegerField()
+    discount_price = models.IntegerField(null=True, blank=True)
 
 class BookAuthor(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
