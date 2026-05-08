@@ -120,6 +120,59 @@ class BookCategoryFilters(APIView):
             'max_price': prices['max_price'] or 0,
         })
 
+class BookListByCollection(ListAPIView):
+    serializer_class = BookSerializer
+    pagination_class = CategoryPagePagination
+
+    def get_queryset(self):
+        queryset = Book.objects.filter(bookcollection__collection__slug=self.kwargs['slug'])
+
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+        if min_price is not None:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price is not None:
+            queryset = queryset.filter(price__lte=max_price)
+
+        authors = self.request.query_params.getlist('authors')
+        if authors:
+            queryset = queryset.filter(bookauthor__author__name__in=authors)
+
+        languages = self.request.query_params.getlist('language')
+        if languages:
+            queryset = queryset.filter(language__in=languages)
+
+        cover_types = self.request.query_params.getlist('cover_type')
+        if cover_types:
+            queryset = queryset.filter(cover_type__in=cover_types)
+
+        return queryset.distinct().order_by('-quantity')
+
+
+class CollectionFilters(APIView):
+    def get(self, request, slug):
+        base_qs = Book.objects.filter(bookcollection__collection__slug=slug)
+        collection = Collection.objects.filter(slug=slug).first()
+
+        authors = list(
+            Author.objects.filter(bookauthor__book__in=base_qs)
+            .values_list('name', flat=True)
+            .distinct()
+        )
+        languages = list(base_qs.values_list('language', flat=True).distinct())
+        cover_types = list(base_qs.values_list('cover_type', flat=True).distinct())
+        prices = base_qs.aggregate(min_price=Min('price'), max_price=Max('price'))
+
+        return Response({
+            'collection_name': collection.name if collection else slug,
+            'authors': authors,
+            'languages': languages,
+            'cover_types': cover_types,
+            'min_price': prices['min_price'] or 0,
+            'max_price': prices['max_price'] or 0,
+        })
+
+
 @permission_classes([IsAdminUser])
 class BookParser(APIView):
     def get(self, request):

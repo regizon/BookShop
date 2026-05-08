@@ -8,6 +8,7 @@ class Author(models.Model):
 
 class Collection(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
+    slug = AutoSlugField(populate_from='name', blank=True)
 
 class Genre(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False)

@@ -149,4 +149,4 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Collection
-        fields = ['id', 'name', 'books']
+        fields = ['id', 'name', 'slug', 'books']
