@@ -2,6 +2,7 @@ from django.db.models import Prefetch, Case, When, IntegerField, Min, Max
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView, CreateAPIView
 from rest_framework.decorators import permission_classes
 from rest_framework import filters, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -56,19 +57,14 @@ class BookCollectionList(ListCreateAPIView):
 
     serializer_class = CollectionSerializer
 
-    # def get_queryset(self):
-    #     queryset = Book.objects.all()
-    #     category = self.request.query_params.get('category')
-    #     if category is not None:
-    #         queryset = queryset.filter(bookgenre__genre__name=category.capitalize())
-    #     return queryset
 
-# @permission_classes([IsAdminUser])
-# class BookCreate(CreateAPIView):
+class CategoryPagePagination(PageNumberPagination):
+    page_size = 12
 
 
 class BookListByCategory(ListAPIView):
     serializer_class = BookSerializer
+    pagination_class = CategoryPagePagination
 
     def get_queryset(self):
         queryset = Book.objects.filter(bookgenre__genre__slug=self.kwargs['category'])

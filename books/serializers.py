@@ -14,6 +14,13 @@ class BookSerializer(serializers.ModelSerializer,):
     publisher_read = serializers.SerializerMethodField()
     author_read = serializers.SerializerMethodField()
     genres_read = serializers.SerializerMethodField()
+
+    def validate_language(self, value):
+        return value.capitalize()
+
+    def validate_cover_type(self, value):
+        return value.capitalize()
+
     class Meta:
         model = Book
         fields= ['author_read', 'id', 'title', 'description', 'price', 'discount_price', 'genres', 'genres_read',
