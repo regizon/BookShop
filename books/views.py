@@ -41,6 +41,12 @@ class BookCollectionPairsList(ListCreateAPIView):
         return Response({'message': 'Both book_id and collection_id are required'}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([IsAdminOrReadOnly])
+class CollectionDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
+
+
+@permission_classes([IsAdminOrReadOnly])
 class BookCollectionList(ListCreateAPIView):
     queryset = Collection.objects.prefetch_related(
         Prefetch(
