@@ -8,3 +8,4 @@ media/
 .idea/
 venv/
 /.venv/
+logs/

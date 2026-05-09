@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Prefetch, Case, When, IntegerField, Min, Max
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, ListAPIView, CreateAPIView
 from rest_framework.decorators import permission_classes
@@ -7,15 +9,18 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from BookShop.audit_mixin import AuditLogMixin
 from books.models import Book, Publisher, Genre, BookCollection, Collection, Author
 from books.serializers import BookSerializer, PublisherSerializer, GenreSerializer, BookCollectionSerializer, \
     CollectionSerializer
 from books.permissions import IsAdminOrReadOnly
 from books.services import parse_book
 
+audit_logger = logging.getLogger('audit_logger')
+
 
 @permission_classes([IsAdminOrReadOnly])
-class BookList(ListCreateAPIView):
+class BookList(AuditLogMixin, ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = [filters.SearchFilter]
@@ -23,7 +28,7 @@ class BookList(ListCreateAPIView):
 
 
 @permission_classes([IsAdminOrReadOnly])
-class BookCollectionPairsList(ListCreateAPIView):
+class BookCollectionPairsList(AuditLogMixin, ListCreateAPIView):
     queryset = BookCollection.objects.all()
     serializer_class = BookCollectionSerializer
 
@@ -34,6 +39,13 @@ class BookCollectionPairsList(ListCreateAPIView):
             deleted_count, _ = BookCollection.objects.filter(book_id=book_id, collection_id=collection_id).delete()
 
             if deleted_count:
+                if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+                    audit_logger.info(
+                        'DELETE | admin=%s | model=BookCollection | book_id=%s | collection_id=%s',
+                        request.user.id,
+                        book_id,
+                        collection_id,
+                    )
                 return Response({"message": "Book was deleted successfully"}, status=status.HTTP_200_OK)
 
             return Response({'message': "Book wasn't found"}, status=status.HTTP_404_NOT_FOUND)
@@ -41,7 +53,7 @@ class BookCollectionPairsList(ListCreateAPIView):
         return Response({'message': 'Both book_id and collection_id are required'}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([IsAdminOrReadOnly])
-class CollectionDetail(RetrieveUpdateDestroyAPIView):
+class CollectionDetail(AuditLogMixin, RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
 
@@ -56,7 +68,7 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
 
 
 @permission_classes([IsAdminOrReadOnly])
-class BookCollectionList(ListCreateAPIView):
+class BookCollectionList(AuditLogMixin, ListCreateAPIView):
     queryset = Collection.objects.prefetch_related(
         Prefetch(
             'bookcollection_set',
@@ -195,22 +207,22 @@ class BookParser(APIView):
             return Response({"message": "Book wasn't found or something went wrong with Books API"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"message": "author and title are required"}, status=status.HTTP_400_BAD_REQUEST)
 @permission_classes([IsAdminOrReadOnly])
-class BookDetails(RetrieveUpdateDestroyAPIView):
+class BookDetails(AuditLogMixin, RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
 @permission_classes([IsAdminOrReadOnly])
-class PublisherList(ListCreateAPIView):
+class PublisherList(AuditLogMixin, ListCreateAPIView):
     queryset = Publisher.objects.all()
     serializer_class = PublisherSerializer
 
 @permission_classes([IsAdminOrReadOnly])
-class PublisherDetails(RetrieveUpdateDestroyAPIView):
+class PublisherDetails(AuditLogMixin, RetrieveUpdateDestroyAPIView):
     queryset = Publisher.objects.all()
     serializer_class = PublisherSerializer
 
 
 @permission_classes([IsAdminOrReadOnly])
-class GenreList(ListCreateAPIView):
+class GenreList(AuditLogMixin, ListCreateAPIView):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer

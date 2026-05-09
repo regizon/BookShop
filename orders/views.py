@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
 
+from BookShop.audit_mixin import AuditLogMixin
 from cart.models import Cart, CartItem
 from orders.models import Order, OrderItem
 from orders.serializers import OrderSerializer, RecentOrderSerializer, OrderUpdateSerializer
@@ -60,7 +61,7 @@ class OrderList(ListAPIView):
         serializer = OrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
-class OrderAdminUpdate(UpdateAPIView):
+class OrderAdminUpdate(AuditLogMixin, UpdateAPIView):
     permission_classes = [IsAdminUser, ]
     queryset = Order.objects.all()
     serializer_class = OrderUpdateSerializer

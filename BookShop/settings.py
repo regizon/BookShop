@@ -19,6 +19,9 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -208,3 +211,60 @@ SESSION_COOKIE_SECURE = False
 # JWT cookie behaviour — set DJANGO_ENV=production in prod to harden cookies
 # (Secure=True, SameSite=Strict). No additional settings are needed here;
 # _cookie_kwargs() in users/views.py reads DJANGO_ENV at request time.
+
+_log_fmt = '[%(asctime)s] [%(levelname)s] [%(name)s] — %(message)s'
+_log_datefmt = '%Y-%m-%d %H:%M:%S'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'security': {
+            'format': _log_fmt,
+            'datefmt': _log_datefmt,
+        },
+    },
+    'handlers': {
+        'auth_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOGS_DIR / 'auth.log'),
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'security',
+            'encoding': 'utf-8',
+        },
+        'audit_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOGS_DIR / 'audit.log'),
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'security',
+            'encoding': 'utf-8',
+        },
+        'security_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOGS_DIR / 'security.log'),
+            'maxBytes': 10 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'security',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        'auth_logger': {
+            'handlers': ['auth_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'audit_logger': {
+            'handlers': ['audit_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'security_logger': {
+            'handlers': ['security_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
