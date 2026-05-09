@@ -134,13 +134,13 @@ STATIC_URL = 'static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'users.authentication.CookieJWTAuthentication',
     )
 }
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=30, minutes=35),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=0, minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -196,9 +196,15 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://localhost:5174"
+    "http://localhost:5174",
+    # PROD: add your production origin here, e.g. "https://yourdomain.com"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = False
+
+# JWT cookie behaviour — set DJANGO_ENV=production in prod to harden cookies
+# (Secure=True, SameSite=Strict). No additional settings are needed here;
+# _cookie_kwargs() in users/views.py reads DJANGO_ENV at request time.
