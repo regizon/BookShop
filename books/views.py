@@ -45,6 +45,15 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.name == 'Акції':
+            return Response(
+                {'message': "Collection 'Акції' cannot be deleted because it is used for discounted books."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
 
 @permission_classes([IsAdminOrReadOnly])
 class BookCollectionList(ListCreateAPIView):
@@ -65,7 +74,7 @@ class BookCollectionList(ListCreateAPIView):
 
 
 class CategoryPagePagination(PageNumberPagination):
-    page_size = 12
+    page_size = 10
 
 
 class BookListByCategory(ListAPIView):

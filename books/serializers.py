@@ -46,14 +46,13 @@ class BookSerializer(serializers.ModelSerializer,):
         return authors
 
     def _sync_akcii_collection(self, book):
-        akcii = Collection.objects.filter(name='Акції').first()
-        if akcii is None:
-            logger.warning("Collection 'Акції' not found in the database; skipping discount sync")
-            return
         if book.discount_price is not None:
+            akcii, _ = Collection.objects.get_or_create(name='Акції')
             BookCollection.objects.get_or_create(book=book, collection=akcii)
         else:
-            BookCollection.objects.filter(book=book, collection=akcii).delete()
+            akcii = Collection.objects.filter(name='Акції').first()
+            if akcii is not None:
+                BookCollection.objects.filter(book=book, collection=akcii).delete()
 
     def update(self, instance, validated_data):
         genres = validated_data.pop('genres', None)
