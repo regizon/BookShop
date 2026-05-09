@@ -42,3 +42,10 @@ class OrderSerializer(serializers.ModelSerializer):
             elif 'apartment' not in data:
                 raise ValidationError({'apartment': "Необхідно вказати квартиру при виборі кур'єрскої доставки"})
         return data
+
+class OrderUpdateSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(required=False, allow_blank=True)
+    class Meta:
+        model = Order
+        fields = ['delivery_status', 'payment_status', 'name', 'surname', 'comments', 'delivery_type', 'email', 'phone',
+                  'city', 'street', 'house', 'apartment']

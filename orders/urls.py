@@ -7,4 +7,5 @@ urlpatterns = [
     path('list/', OrderList.as_view(), name='list'),
     path('<int:pk>/', OrderDetail.as_view(), name='detail'),
     path('recent/', RecentOrders.as_view(), name='recent'),
+    path('update/<int:pk>/', OrderAdminUpdate.as_view(), name='update'),
 ]

@@ -77,10 +77,10 @@ def minus_item(book, cart):
         raise NotSuchItemInCart("В корзині немає такого товару")
 
 def add_item(cart, book):
-    price = book.price
+    price = book.discount_price if book.discount_price is not None else book.price
     quantity = book.quantity
     if quantity > 0:
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, price=price)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, defaults={'price': price})
         if created:
             cart_item.save()
         else:
