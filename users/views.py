@@ -33,7 +33,6 @@ def _get_user_agent(request) -> str:
     return request.META.get('HTTP_USER_AGENT', 'unknown')
 
 
-# ── cookie helpers ────────────────────────────────────────────────────────────
 
 def _cookie_kwargs():
     is_prod = os.getenv('DJANGO_ENV') == 'production'
@@ -71,7 +70,6 @@ def clear_auth_cookies(response):
     response.delete_cookie('refresh_token', path='/', samesite=samesite)
 
 
-# ── views ─────────────────────────────────────────────────────────────────────
 
 class RegisterUserRequest(APIView):
     def post(self, request):
@@ -148,7 +146,6 @@ class EmailVerify(APIView):
 
 
 class CookieTokenRefreshView(APIView):
-    """Reads refresh_token cookie, issues a new access_token cookie."""
 
     def post(self, request):
         raw_refresh = request.COOKIES.get('refresh_token')
@@ -184,7 +181,6 @@ class LogoutView(APIView):
 
 
 class MeView(APIView):
-    """Returns basic profile for any authenticated user (used to bootstrap frontend auth state)."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

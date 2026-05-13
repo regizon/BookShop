@@ -10,7 +10,6 @@ from cart.services import get_or_create_cart, add_item, NotEnoughItemsInStock, N
     minus_item, get_cart
 
 
-# Create your views here.
 class AddItemToCart(APIView):
     queryset = CartItem.objects.all()
 

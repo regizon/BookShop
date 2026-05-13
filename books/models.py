@@ -1,6 +1,5 @@
 from autoslug import AutoSlugField
 from django.db import models
-from django.utils.text import slugify
 
 
 class Author(models.Model):
@@ -14,11 +13,6 @@ class Genre(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False)
     slug = AutoSlugField(populate_from='name')
 
-    # def save(self, *args, **kwargs):
-    #     if not self.slug:
-    #         self.slug = slugify(self.name)
-    #
-    #     super(Genre, self).save(*args, **kwargs)
 
 class Publisher(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)

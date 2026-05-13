@@ -1,4 +1,3 @@
-from autoslug.fields import modeltranslation_update_slugs
 from django.db import models
 from books.models import Book
 from users.models import User
