@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from random import randint
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
@@ -35,6 +35,21 @@ def request_login_code(email):
     # )
     print(code)
 
+# def request_login_code(email: str):
+#     code = generate_2fa_code()
+#     EmailLoginCode.objects.create(email=email, code=code)
+#
+#     html_body = render_to_string("emails/login_code.html", {"code": code})
+#     text_body = f"Ваш код для входу на BookHeaven: {code}\n\nКод дійсний 5 хвилин."
+#
+#     msg = EmailMultiAlternatives(
+#         subject="Код для входу — BookHeaven",
+#         body=text_body,
+#         from_email=None,
+#         to=[email],
+#     )
+#     msg.attach_alternative(html_body, "text/html")
+#     msg.send()
 
 def check_login_code(email, code):
     db_code = EmailLoginCode.objects.filter(email=email, is_used=False).order_by('-created_at').first()
