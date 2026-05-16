@@ -211,6 +211,13 @@ class BookDetails(AuditLogMixin, RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.quantity = 0
+        instance.save(update_fields=['quantity'])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 @permission_classes([IsAdminOrReadOnly])
 class PublisherList(AuditLogMixin, ListCreateAPIView):
     queryset = Publisher.objects.all()
